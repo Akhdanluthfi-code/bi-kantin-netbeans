@@ -1,0 +1,403 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package form;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
+
+/**
+ *
+ * @author Akhdan Luthfi B
+ */
+public class FormSiswa extends javax.swing.JFrame {
+    
+    private String username;
+    private int userId = -1;
+
+    private DefaultTableModel modelMenu;
+    private DefaultTableModel modelPesanan;
+
+    
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FormSiswa.class.getName());
+
+    /**
+     * Creates new form FormSiswa
+     */
+    
+public FormSiswa() {
+    this("budi_siswa");
+}
+
+public FormSiswa(String username) {
+    initComponents();
+    setLocationRelativeTo(null);
+
+    this.username = username;
+
+    spnJumlah.setModel(
+        new javax.swing.SpinnerNumberModel(1, 1, 100, 1)
+    );
+
+    loadUserId();
+    loadDataMenu();
+    loadPesananSaya();
+}
+
+
+private void loadUserId() {
+    String sql = "SELECT id FROM users "
+            + "WHERE username = ? AND role = 'siswa'";
+
+    try (Connection conn = koneksi.Koneksi.getConnection()) {
+        if (conn == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Koneksi database gagal!");
+            return;
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    userId = rs.getInt("id");
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Akun siswa tidak ditemukan!");
+                }
+            }
+        }
+
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this,
+                "Gagal mengambil data siswa: " + e.getMessage());
+    }
+}
+
+
+private void loadDataMenu() {
+    modelMenu = new DefaultTableModel();
+
+    modelMenu.addColumn("ID");
+    modelMenu.addColumn("Nama Menu");
+    modelMenu.addColumn("Harga");
+    modelMenu.addColumn("Kategori");
+
+    tblMenuSiswa.setModel(modelMenu);
+
+    String sql = "SELECT id, nama_menu, harga, kategori "
+            + "FROM menu ORDER BY id ASC";
+
+    try (Connection conn = koneksi.Koneksi.getConnection()) {
+        if (conn == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Koneksi database gagal!");
+            return;
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                modelMenu.addRow(new Object[]{
+                    rs.getInt("id"),
+                    rs.getString("nama_menu"),
+                    rs.getInt("harga"),
+                    rs.getString("kategori")
+                });
+            }
+        }
+
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this,
+                "Gagal memuat daftar menu: " + e.getMessage());
+    }
+}
+
+
+private void loadPesananSaya() {
+    modelPesanan = new DefaultTableModel();
+
+    modelPesanan.addColumn("ID Pesanan");
+    modelPesanan.addColumn("Nama Menu");
+    modelPesanan.addColumn("Jumlah");
+    modelPesanan.addColumn("Total Harga");
+    modelPesanan.addColumn("Status");
+
+    tblPesanan.setModel(modelPesanan);
+
+    if (userId == -1) {
+        return;
+    }
+
+    String sql = "SELECT p.id, m.nama_menu, p.jumlah, "
+            + "p.total_harga, p.status "
+            + "FROM pesanan p "
+            + "JOIN menu m ON p.menu_id = m.id "
+            + "WHERE p.user_id = ? "
+            + "ORDER BY p.id DESC";
+
+    try (Connection conn = koneksi.Koneksi.getConnection()) {
+        if (conn == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Koneksi database gagal!");
+            return;
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    modelPesanan.addRow(new Object[]{
+                        rs.getInt("id"),
+                        rs.getString("nama_menu"),
+                        rs.getInt("jumlah"),
+                        rs.getInt("total_harga"),
+                        rs.getString("status")
+                    });
+                }
+            }
+        }
+
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this,
+                "Gagal memuat riwayat pesanan: " + e.getMessage());
+    }
+}
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        lblJudul = new javax.swing.JLabel();
+        lblDaftarMenu = new javax.swing.JLabel();
+        lblJumlah = new javax.swing.JLabel();
+        lblRiwayat = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblMenuSiswa = new javax.swing.JTable();
+        spnJumlah = new javax.swing.JSpinner();
+        btnPesan = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblPesanan = new javax.swing.JTable();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        lblJudul.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lblJudul.setText("BI-KANTIN - SISWA");
+
+        lblDaftarMenu.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblDaftarMenu.setText("Daftar Menu Kantin");
+
+        lblJumlah.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblJumlah.setText("Jumlah Pesanan");
+
+        lblRiwayat.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        lblRiwayat.setText("Riwayat Pesanan Saya");
+
+        tblMenuSiswa.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(tblMenuSiswa);
+
+        btnPesan.setText("Buat Pesanan");
+        btnPesan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPesanActionPerformed(evt);
+            }
+        });
+
+        tblPesanan.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane2.setViewportView(tblPesanan);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                                .addComponent(lblDaftarMenu)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(lblJumlah)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(spnJumlah, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(6, 6, 6)
+                                    .addComponent(btnPesan, javax.swing.GroupLayout.PREFERRED_SIZE, 406, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 420, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(6, 6, 6)
+                                        .addComponent(lblRiwayat))))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(146, 146, 146)
+                        .addComponent(lblJudul)))
+                .addContainerGap(24, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addComponent(lblJudul)
+                .addGap(18, 18, 18)
+                .addComponent(lblDaftarMenu)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblJumlah)
+                    .addComponent(spnJumlah, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnPesan, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(lblRiwayat)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(23, 23, 23))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void btnPesanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesanActionPerformed
+        
+int baris = tblMenuSiswa.getSelectedRow();
+
+if (baris == -1) {
+    JOptionPane.showMessageDialog(this,
+            "Pilih menu yang ingin dipesan dari tabel!");
+    return;
+}
+
+if (userId == -1) {
+    JOptionPane.showMessageDialog(this,
+            "Data akun siswa tidak ditemukan!");
+    return;
+}
+
+int menuId = Integer.parseInt(
+        tblMenuSiswa.getValueAt(baris, 0).toString());
+
+int harga = Integer.parseInt(
+        tblMenuSiswa.getValueAt(baris, 2).toString());
+
+int jumlah = ((Number) spnJumlah.getValue()).intValue();
+
+if (jumlah < 1) {
+    JOptionPane.showMessageDialog(this,
+            "Jumlah pesanan minimal 1!");
+    return;
+}
+
+int totalHarga = harga * jumlah;
+
+String sql = "INSERT INTO pesanan "
+        + "(user_id, menu_id, jumlah, total_harga, status) "
+        + "VALUES (?, ?, ?, ?, ?)";
+
+try (Connection conn = koneksi.Koneksi.getConnection()) {
+    if (conn == null) {
+        JOptionPane.showMessageDialog(this,
+                "Koneksi database gagal!");
+        return;
+    }
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, userId);
+        ps.setInt(2, menuId);
+        ps.setInt(3, jumlah);
+        ps.setInt(4, totalHarga);
+        ps.setString(5, "Menunggu Konfirmasi");
+
+        ps.executeUpdate();
+    }
+
+    JOptionPane.showMessageDialog(this,
+            "Pesanan berhasil dibuat!\n"
+            + "Total harga: Rp" + totalHarga);
+
+    loadPesananSaya();
+    spnJumlah.setValue(1);
+
+} catch (SQLException e) {
+    JOptionPane.showMessageDialog(this,
+            "Gagal membuat pesanan: " + e.getMessage());
+}
+
+    }//GEN-LAST:event_btnPesanActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
+            logger.log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(() -> new FormSiswa().setVisible(true));
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnPesan;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblDaftarMenu;
+    private javax.swing.JLabel lblJudul;
+    private javax.swing.JLabel lblJumlah;
+    private javax.swing.JLabel lblRiwayat;
+    private javax.swing.JSpinner spnJumlah;
+    private javax.swing.JTable tblMenuSiswa;
+    private javax.swing.JTable tblPesanan;
+    // End of variables declaration//GEN-END:variables
+}
